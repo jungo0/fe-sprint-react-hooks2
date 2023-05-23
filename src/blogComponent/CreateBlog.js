@@ -1,17 +1,32 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const CreateBlog = () => {
-    const [title, setTitle] = useState('');
-    const [body, setBody] = useState('');
-    const [author, setAuthor] = useState('김코딩');
+const CreateBlog = ({ blogs, setBlogs }) => {
+  const navigate = useNavigate();
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [author, setAuthor] = useState("김코딩");
 
     const handleSubmit = (e) => {
         e.preventDefault();
         /* 등록 버튼을 누르면 게시물이 등록이 되며 home으로 리다이렉트 되어야 합니다. */
         /* 작성한 내용과 useNavigate를 이용하여 handleSubmit의 로직을 작성해보세요. */
-       console.log(e.type);
-    }
+        fetch(`http://localhost:3001/blogs`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title,
+            body,
+            author,
+            likes: 0,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => setBlogs([data, ...blogs]));
+        navigate(`/`);
+    
+        console.log(e.type);
+      };
 
     return (
       <div className="create">
