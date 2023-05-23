@@ -1,13 +1,14 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Home from './Home';
-import Navbar from './component/Navbar';
-import CreateBlog from './blogComponent/CreateBlog';
-import BlogDetails from './blogComponent/BlogDetail';
-import NotFound from './component/NotFound';
-import Footer from './component/Footer';
-import { useEffect, useState } from 'react';
-
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Navbar from "./component/Navbar";
+import Footer from "./component/Footer";
+import { useEffect, useState } from "react";
+import { Suspense, lazy } from "react";
+import Loading from "./component/Loading";
 /* react.lazy()와 suspense를 사용해 App 컴포넌트를 리팩토링 해보세요. */
+const Home = lazy(() => import("./Home"));
+const CreateBlog = lazy(() => import("./blogComponent/CreateBlog"));
+const BlogDetails = lazy(() => import("./blogComponent/BlogDetail"));
+const NotFound = lazy(() => import("./component/NotFound"));
 
 function App() {
   const [blogs, setBlogs] = useState(null);
@@ -19,40 +20,60 @@ function App() {
   /* util 폴더 내에 존재하는 useFetch에 custom hook을 작성해 주세요. */
   useEffect(() => {
     setTimeout(() => {
-      fetch('http://localhost:3001/blogs')
-      .then(res => {
-        if (!res.ok) {
-          throw Error('could not fetch the data for that resource');
-        } 
-        return res.json();
-      })
-      .then(data => {
-        setIsPending(false);
-        setBlogs(data);
-        setError(null);
-      })
-      .catch(err => {
-        setIsPending(false);
-        setError(err.message);
-      })
-    }, 1000);
-  }, [])
+      fetch("http://localhost:3001/blogs")
+        .then((res) => {
+          if (!res.ok) {
+            throw Error("could not fetch the data for that resource");
+          }
+          return res.json();
+        })
+        .then((data) => {
+          setIsPending(false);
+          setBlogs(data);
+          setError(null);
+        })
+        .catch((err) => {
+          setIsPending(false);
+          setError(err.message);
+        });
+      console.log("here");
+    }, 0);
+  }, [isChange]);
 
   return (
     <BrowserRouter>
-      { error && <div>{ error }</div> }
-        <div className="app">
+      {error && <div>{error}</div>}
+      <div className="app">
+        <Suspense fallback={<Loading />}>
           <Navbar />
           <div className="content">
             <Routes>
-              <Route exact path="/" element={<Home blogs={blogs} isPending={isPending} />} />
-              <Route path="/create" element={<CreateBlog />} />
-              <Route path="/blogs/:id" element={<BlogDetails />} />
+              <Route
+                exact
+                path="/"
+                element={<Home blogs={blogs} isPending={isPending} />}
+              />
+              <Route
+                path="/create"
+                element={<CreateBlog blogs={blogs} setBlogs={setBlogs} />}
+              />
+              <Route
+                path="/blogs/:id"
+                element={
+                  <BlogDetails
+                    blogs={blogs}
+                    setBlogs={setBlogs}
+                    setIsChange={setIsChange}
+                    isChange={isChange}
+                  />
+                }
+              />
               <Route path="/blogs/:id" element={<NotFound />} />
             </Routes>
           </div>
-          <Footer/>
-        </div>
+        </Suspense>
+        <Footer />
+      </div>
     </BrowserRouter>
   );
 }
