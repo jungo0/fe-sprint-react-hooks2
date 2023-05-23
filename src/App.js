@@ -14,6 +14,7 @@ function App() {
   const [blogs, setBlogs] = useState(null);
   const [isPending, setIsPending] = useState(true);
   const [error, setError] = useState(null);
+  const [isChange, setIsChange] = useState(false);
 
   /* get 메소드를 통해 데이터를 받아오는 useEffect hook은 컴포넌트 내 여기저기 존재하고 있습니다. */
   /* 해당 hook은 반복이 되는 부분이 있으므로 어떻게 custom hook으로 만들 수 있을지 고민해 봅시다. */
